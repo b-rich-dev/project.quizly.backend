@@ -10,6 +10,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password', 'confirmed_password']
         extra_kwargs = {
             'password': {'write_only': True},
+            'email': {'required': True},
         }
 
     def validate_confirmed_password(self, value):
@@ -19,6 +20,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
     
     def validate_email(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Email is required.")
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email is already in use.")
         return value
