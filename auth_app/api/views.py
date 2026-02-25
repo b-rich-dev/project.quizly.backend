@@ -99,7 +99,7 @@ class LogoutView(APIView):
             pass
         
         response = Response({"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."}, status=status.HTTP_200_OK)
-        response.delete_cookie('access_token', secure=True, samesite='Lax')
-        response.delete_cookie('refresh_token', secure=True, samesite='Lax')
+        response.delete_cookie('access_token', samesite='Lax')
+        response.delete_cookie('refresh_token', samesite='Lax')
         return response
     
