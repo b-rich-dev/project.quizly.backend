@@ -60,3 +60,6 @@ base_info_app/management
 # Docker
 Dockerfile
 .dockerignore
+
+# Other
+help.py
