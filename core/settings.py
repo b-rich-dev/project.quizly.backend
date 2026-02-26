@@ -10,21 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&dk-1+^n!ytz$rpxhaumq^q(gp+_xi80r4)c#%l=$z7^-!o%s^'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-&dk-1+^n!ytz$rpxhaumq^q(gp+_xi80r4)c#%l=$z7^-!o%s^')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -50,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'auth_app.middleware.JWTAuthCookieMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -134,3 +140,22 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Media files (uploads)
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+
+# Gemini API configuration
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDdU0wabiFBfT2WEHDhlq365Xgicr9IopU')
+
+# FFmpeg configuration
+# Optional: Set custom FFmpeg path via environment variable if not in system PATH
+# Example: FFMPEG_PATH=/usr/local/bin/ffmpeg or C:\ffmpeg\bin
+FFMPEG_PATH = os.environ.get('FFMPEG_PATH', None)
+
+# Note: For production, configure webserver timeout (Gunicorn/uWSGI) to 300s+ for long video processing

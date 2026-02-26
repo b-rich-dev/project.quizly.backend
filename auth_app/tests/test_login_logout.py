@@ -17,8 +17,8 @@ class LoginLogoutTests(APITestCase):
         }    
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access_token', response.cookies)
-        self.assertIn('refresh_token', response.cookies)
+        self.assertIn('access', response.cookies)
+        self.assertIn('refresh', response.cookies)
         self.assertIn('user', response.data)
         self.assertEqual(response.data['user']['username'], 'testuser')
         self.assertEqual(response.data['user']['email'], 'testuser@example.com')
@@ -62,22 +62,22 @@ class LoginLogoutTests(APITestCase):
         login_response = self.client.post(login_url, login_data, format='json')
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
         
-        access_token = login_response.cookies.get('access_token').value
+        access_token = login_response.cookies.get('access').value
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
         
-        self.client.cookies['access_token'] = login_response.cookies.get('access_token')
-        self.client.cookies['refresh_token'] = login_response.cookies.get('refresh_token')
+        self.client.cookies['access'] = login_response.cookies.get('access')
+        self.client.cookies['refresh'] = login_response.cookies.get('refresh')
         
         logout_url = reverse('logout')
         logout_response = self.client.post(logout_url, format='json')
         self.assertEqual(logout_response.status_code, status.HTTP_200_OK)
         
-        self.assertIn('access_token', logout_response.cookies)
-        self.assertIn('refresh_token', logout_response.cookies)
-        self.assertEqual(logout_response.cookies['access_token'].value, '')
-        self.assertEqual(logout_response.cookies['refresh_token'].value, '')
-        self.assertEqual(logout_response.cookies['access_token']['max-age'], 0)
-        self.assertEqual(logout_response.cookies['refresh_token']['max-age'], 0)
+        self.assertIn('access', logout_response.cookies)
+        self.assertIn('refresh', logout_response.cookies)
+        self.assertEqual(logout_response.cookies['access'].value, '')
+        self.assertEqual(logout_response.cookies['refresh'].value, '')
+        self.assertEqual(logout_response.cookies['access']['max-age'], 0)
+        self.assertEqual(logout_response.cookies['refresh']['max-age'], 0)
         
         self.assertEqual(logout_response.data['detail'], "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid.")
     
@@ -104,11 +104,11 @@ class RefreshTokenTests(APITestCase):
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
         
         # Get the refresh token from cookies
-        refresh_token = login_response.cookies.get('refresh_token')
-        old_access_token = login_response.cookies.get('access_token').value
+        refresh_token = login_response.cookies.get('refresh')
+        old_access_token = login_response.cookies.get('access').value
         
         # Set the refresh token cookie for the refresh request
-        self.client.cookies['refresh_token'] = refresh_token
+        self.client.cookies['refresh'] = refresh_token
         
         # Call the refresh endpoint
         refresh_url = reverse('token_refresh')
@@ -117,10 +117,10 @@ class RefreshTokenTests(APITestCase):
         # Verify the response
         self.assertEqual(refresh_response.status_code, status.HTTP_200_OK)
         self.assertEqual(refresh_response.data['detail'], 'Token refreshed')
-        self.assertIn('access_token', refresh_response.cookies)
+        self.assertIn('access', refresh_response.cookies)
         
         # Verify new access token is different from old one
-        new_access_token = refresh_response.cookies.get('access_token').value
+        new_access_token = refresh_response.cookies.get('access').value
         self.assertNotEqual(old_access_token, new_access_token)
         
     def test_refresh_token_without_cookie(self):
@@ -134,7 +134,7 @@ class RefreshTokenTests(APITestCase):
     def test_refresh_token_invalid(self):
         """Test token refresh with invalid refresh token"""
         # Set an invalid refresh token
-        self.client.cookies['refresh_token'] = 'invalid_token_string'
+        self.client.cookies['refresh'] = 'invalid_token_string'
         
         refresh_url = reverse('token_refresh')
         response = self.client.post(refresh_url, format='json')
@@ -153,13 +153,13 @@ class RefreshTokenTests(APITestCase):
         login_response = self.client.post(login_url, login_data, format='json')
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
         
-        access_token = login_response.cookies.get('access_token').value
-        refresh_token = login_response.cookies.get('refresh_token')
+        access_token = login_response.cookies.get('access').value
+        refresh_token = login_response.cookies.get('refresh')
         
         # Log out (this should blacklist the refresh token)
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
-        self.client.cookies['access_token'] = login_response.cookies.get('access_token')
-        self.client.cookies['refresh_token'] = refresh_token
+        self.client.cookies['access'] = login_response.cookies.get('access')
+        self.client.cookies['refresh'] = refresh_token
         
         logout_url = reverse('logout')
         logout_response = self.client.post(logout_url, format='json')

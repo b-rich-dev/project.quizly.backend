@@ -1,12 +1,14 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Quiz(models.Model):
+    user = models.ForeignKey(User, related_name='quizzes', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    video_url = models.URLField(required=True)
+    video_url = models.URLField()
     
 
     def __str__(self):
@@ -16,8 +18,8 @@ class Quiz(models.Model):
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
     question_title = models.CharField(max_length=255)
-    question_options = models.JSONField(choices=[('Option A', 'Option A'), ('Option B', 'Option B'), ('Option C', 'Option C'), ('Option D', 'Option D')])
-    answer = models.CharField(max_length=20, choices=[('Option A', 'Option A'), ('Option B', 'Option B'), ('Option C', 'Option C'), ('Option D', 'Option D')])
+    question_options = models.JSONField()
+    answer = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

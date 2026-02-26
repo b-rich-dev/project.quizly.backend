@@ -36,7 +36,7 @@ class CookieLoginView(TokenObtainPairView):
         user_data = response.data.get('user')
         
         response.set_cookie(
-            key='access_token', 
+            key='access', 
             value=access_token, 
             httponly=True,
             secure=True,
@@ -44,7 +44,7 @@ class CookieLoginView(TokenObtainPairView):
         )
         
         response.set_cookie(
-            key='refresh_token', 
+            key='refresh', 
             value=refresh_token, 
             httponly=True,
             secure=True,
@@ -58,7 +58,7 @@ class CookieLoginView(TokenObtainPairView):
 
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.COOKIES.get('refresh')
         
         if refresh_token is None:
             return Response({'detail': 'Refresh token not found.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -74,7 +74,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         
         response = Response({'detail': 'Token refreshed'})
         response.set_cookie(
-            key='access_token', 
+            key='access', 
             value=access_token, 
             httponly=True,
             secure=True,
@@ -91,7 +91,7 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            refresh_token = request.COOKIES.get('refresh_token')
+            refresh_token = request.COOKIES.get('refresh')
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
@@ -99,7 +99,7 @@ class LogoutView(APIView):
             pass
         
         response = Response({"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."}, status=status.HTTP_200_OK)
-        response.delete_cookie('access_token', samesite='Lax')
-        response.delete_cookie('refresh_token', samesite='Lax')
+        response.delete_cookie('access', samesite='Lax')
+        response.delete_cookie('refresh', samesite='Lax')
         return response
     
