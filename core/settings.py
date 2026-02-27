@@ -151,7 +151,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 # Gemini API configuration
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDdU0wabiFBfT2WEHDhlq365Xgicr9IopU')
+# IMPORTANT: Never hardcode API keys in code! Use environment variables only.
+# Get your API key from: https://aistudio.google.com/apikey
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set. Please add it to your .env file.")
 
 # FFmpeg configuration
 # Optional: Set custom FFmpeg path via environment variable if not in system PATH

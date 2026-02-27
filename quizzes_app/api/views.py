@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from quizzes_app.models import Quiz
-from .serializers import QuizCreateSerializer, QuizSerializer
+from .serializers import QuizCreateSerializer, QuizSerializer, QuizDetailSerializer
 
 
 class QuizView(APIView):
@@ -27,7 +27,7 @@ class QuizView(APIView):
             quiz = serializer.save()
             quiz = Quiz.objects.prefetch_related('questions').get(pk=quiz.pk)
             
-            quiz_serializer = QuizSerializer(quiz)
+            quiz_serializer = QuizDetailSerializer(quiz)
             
             return Response(quiz_serializer.data, status=status.HTTP_201_CREATED)
             

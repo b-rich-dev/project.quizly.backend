@@ -17,9 +17,12 @@ db.sqlite3
 
 # Env / Secrets
 .env
-.env.*
+.env.local
+.env.production
+.env.development
 *.secret
 *.token
+# Note: .env.example should NOT be ignored - it's a template for other developers
 
 # VSCode / Editor
 .vscode/

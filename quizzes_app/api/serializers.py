@@ -14,7 +14,16 @@ from .utils import (
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    """Serializer for Question model (read-only)"""
+    """Serializer for Question model for GET requests (without timestamps)"""
+    
+    class Meta:
+        model = Question
+        fields = ['id', 'question_title', 'question_options', 'answer']
+        read_only_fields = fields
+
+
+class QuestionDetailSerializer(serializers.ModelSerializer):
+    """Serializer for Question model for POST responses (with timestamps)"""
     
     class Meta:
         model = Question
@@ -23,9 +32,20 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class QuizSerializer(serializers.ModelSerializer):
-    """Serializer for Quiz model with nested questions (read-only)"""
+    """Serializer for Quiz model for GET requests (without timestamps in questions)"""
     
     questions = QuestionSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Quiz
+        fields = ['id', 'title', 'description', 'created_at', 'updated_at', 'video_url', 'questions']
+        read_only_fields = fields
+
+
+class QuizDetailSerializer(serializers.ModelSerializer):
+    """Serializer for Quiz model for POST responses (with timestamps in questions)"""
+    
+    questions = QuestionDetailSerializer(many=True, read_only=True)
     
     class Meta:
         model = Quiz
