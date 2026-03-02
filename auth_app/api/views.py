@@ -5,8 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     
@@ -19,6 +22,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
  
  
+@method_decorator(csrf_exempt, name='dispatch')
 class TestView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -26,6 +30,7 @@ class TestView(APIView):
         return Response({"message": "This is a test endpoint."}, status=status.HTTP_200_OK)   
     
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CookieLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -56,6 +61,7 @@ class CookieLoginView(TokenObtainPairView):
         return response
     
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh')
@@ -83,7 +89,8 @@ class CookieTokenRefreshView(TokenRefreshView):
         
         return response
     
-    
+
+@method_decorator(csrf_exempt, name='dispatch')    
 class LogoutView(APIView):
     """API view for user logout."""
     
