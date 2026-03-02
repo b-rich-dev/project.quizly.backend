@@ -1,10 +1,10 @@
-from unittest.mock import patch
 from django.urls import reverse
 from django.contrib.auth.models import User
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from unittest.mock import patch
 from quizzes_app.models import Quiz, Question
 
 

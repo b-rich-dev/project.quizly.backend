@@ -82,6 +82,7 @@ def download_youtube_audio(video_url: str) -> str:
 
 def transcribe_audio(audio_path: str) -> str:
     """Transcribe audio file to text using Whisper."""
+    
     try:
         model = whisper.load_model("base")
         result = model.transcribe(audio_path)

@@ -1,11 +1,12 @@
-from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 
 from quizzes_app.models import Quiz
-from .serializers import QuizCreateSerializer, QuizSerializer, QuizDetailSerializer
+
 from .permissions import IsOwner
+from .serializers import QuizCreateSerializer, QuizSerializer, QuizDetailSerializer
 
 
 class QuizView(APIView):
@@ -43,6 +44,7 @@ class QuizDetailView(APIView):
     
     def get_object(self, pk):
         """Helper method to get quiz object."""
+        
         try:
             quiz = Quiz.objects.prefetch_related('questions').get(pk=pk)
             self.check_object_permissions(self.request, quiz)
@@ -60,11 +62,11 @@ class QuizDetailView(APIView):
     
     def patch(self, request, pk):
         """Update quiz title and/or description."""
+        
         quiz = self.get_object(pk)
         if not quiz:
             return Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        # Only allow updating title and description
         allowed_fields = {'title', 'description'}
         update_data = {k: v for k, v in request.data.items() if k in allowed_fields}
         
@@ -81,9 +83,11 @@ class QuizDetailView(APIView):
     
     def delete(self, request, pk):
         """Delete a quiz and all its questions."""
+        
         quiz = self.get_object(pk)
         if not quiz:
             return Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
         
         quiz.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    

@@ -6,7 +6,14 @@ from rest_framework.test import APITestCase
 
 
 class RegistrationTests(APITestCase):
+    """
+    Test cases for user registration functionality.
+    Tests successful registration, validation errors, duplicate checks, and required fields.
+    """
+    
     def test_registration(self):
+        """Test successful registration with valid data"""
+        
         url = reverse('register')
         data = {
             'username': 'testuser',
@@ -21,6 +28,8 @@ class RegistrationTests(APITestCase):
         self.assertEqual(response.data['detail'], "User created successfully.")
 
     def test_registration_password_mismatch(self):
+        """Test registration attempt with mismatched passwords"""
+        
         url = reverse('register')
         data = {
             'username': 'testuser2',
@@ -32,6 +41,8 @@ class RegistrationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
     def test_register_duplicate_email(self):
+        """Test registration attempt with an email that already exists"""
+            
         User.objects.create_user(username='existinguser', email='existing@example.com', password='password123')
         url = reverse('register')
         data = {
@@ -45,6 +56,8 @@ class RegistrationTests(APITestCase):
         self.assertIn('email', response.data)
         
     def test_register_duplicate_username(self):
+        """Test registration attempt with a username that already exists"""
+        
         User.objects.create_user(username='existinguser', email='existing@example.com', password='password123')
         url = reverse('register')
         data = {
@@ -58,6 +71,8 @@ class RegistrationTests(APITestCase):
         self.assertIn('username', response.data)
 
     def test_register_missing_fields(self):
+        """Test registration attempt with missing required fields"""
+        
         url = reverse('register')
         data = {
             'username': 'testuser3',
@@ -70,6 +85,8 @@ class RegistrationTests(APITestCase):
         self.assertIn('email', response.data)
         
     def test_register_without_email_field(self):
+        """Test registration attempt without providing an email field"""
+        
         url = reverse('register')
         data = {
             'username': 'testuser4',
@@ -81,6 +98,8 @@ class RegistrationTests(APITestCase):
         self.assertIn('email', response.data)
         
     def test_register_invalid_email_format(self):
+        """Test registration attempt with an invalid email format"""
+        
         url = reverse('register')
         data = {
             'username': 'testuser5',

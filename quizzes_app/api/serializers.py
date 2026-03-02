@@ -1,6 +1,7 @@
-from rest_framework import serializers
 from django.conf import settings
-from quizzes_app.models import Quiz, Question
+
+from rest_framework import serializers
+
 from .utils import (
     validate_youtube_url,
     download_youtube_audio,
@@ -11,6 +12,8 @@ from .utils import (
     TranscriptionError,
     QuizGenerationError,
 )
+
+from quizzes_app.models import Quiz, Question
 
 
 class QuestionSerializer(serializers.ModelSerializer):

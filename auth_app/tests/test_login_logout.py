@@ -6,10 +6,19 @@ from rest_framework.test import APITestCase
 
 
 class LoginLogoutTests(APITestCase):
+    """
+    Test cases for user login and logout functionality.
+    Tests authentication with JWT tokens in cookies and token cleanup on logout.
+    """
+    
     def setUp(self):
+        """Create a test user for authentication tests"""
+        
         self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpassword123')
         
     def test_login(self):
+        """Test successful login with valid credentials"""
+        
         url = reverse('login')
         data = {
             'username': 'testuser',
@@ -25,6 +34,8 @@ class LoginLogoutTests(APITestCase):
         self.assertEqual(response.data['detail'], "Login successfully!")
 
     def test_login_invalid_credentials(self):
+        """Test login attempt with invalid credentials"""
+        
         url = reverse('login')
         data = {
             'username': 'testuser',
@@ -35,6 +46,8 @@ class LoginLogoutTests(APITestCase):
         self.assertEqual(response.data['detail'], 'No active account found with the given credentials')
         
     def test_missing_fields_login(self):
+        """Test login attempt with missing required fields"""
+        
         url = reverse('login')
         data = {
             'username': 'testuser'
@@ -44,6 +57,8 @@ class LoginLogoutTests(APITestCase):
         self.assertIn('password', response.data)
         
     def test_login_nonexistent_user(self):
+        """Test login attempt with a nonexistent user"""
+        
         url = reverse('login')
         data = {
             'username': 'nonexistent',
@@ -54,6 +69,8 @@ class LoginLogoutTests(APITestCase):
         self.assertEqual(response.data['detail'], 'No active account found with the given credentials')
         
     def test_logout(self):
+        """Test successful logout and token cleanup"""
+        
         login_url = reverse('login')
         login_data = {
             'username': 'testuser',
@@ -83,18 +100,26 @@ class LoginLogoutTests(APITestCase):
     
     def test_logout_without_authentication(self):
         """Test that logout requires authentication"""
+        
         logout_url = reverse('logout')
         response = self.client.post(logout_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         
 
 class RefreshTokenTests(APITestCase):
+    """
+    Test cases for JWT token refresh functionality.
+    Tests token refresh, invalid tokens, and blacklisted tokens after logout.
+    """
+    
     def setUp(self):
+        """Create a test user for authentication tests"""
+        
         self.user = User.objects.create_user(username='testuser', password='testpassword123', email='testuser@example.com')
         
     def test_refresh_token(self):
         """Test successful token refresh with valid refresh token"""
-        # First, log in to get tokens
+
         login_url = reverse('login')
         login_data = {
             'username': 'testuser',
@@ -103,28 +128,24 @@ class RefreshTokenTests(APITestCase):
         login_response = self.client.post(login_url, login_data, format='json')
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
         
-        # Get the refresh token from cookies
         refresh_token = login_response.cookies.get('refresh')
         old_access_token = login_response.cookies.get('access').value
         
-        # Set the refresh token cookie for the refresh request
         self.client.cookies['refresh'] = refresh_token
         
-        # Call the refresh endpoint
         refresh_url = reverse('token_refresh')
         refresh_response = self.client.post(refresh_url, format='json')
         
-        # Verify the response
         self.assertEqual(refresh_response.status_code, status.HTTP_200_OK)
         self.assertEqual(refresh_response.data['detail'], 'Token refreshed')
         self.assertIn('access', refresh_response.cookies)
         
-        # Verify new access token is different from old one
         new_access_token = refresh_response.cookies.get('access').value
         self.assertNotEqual(old_access_token, new_access_token)
         
     def test_refresh_token_without_cookie(self):
         """Test token refresh without refresh token cookie"""
+        
         refresh_url = reverse('token_refresh')
         response = self.client.post(refresh_url, format='json')
         
@@ -133,7 +154,7 @@ class RefreshTokenTests(APITestCase):
         
     def test_refresh_token_invalid(self):
         """Test token refresh with invalid refresh token"""
-        # Set an invalid refresh token
+
         self.client.cookies['refresh'] = 'invalid_token_string'
         
         refresh_url = reverse('token_refresh')
@@ -155,8 +176,7 @@ class RefreshTokenTests(APITestCase):
         
         access_token = login_response.cookies.get('access').value
         refresh_token = login_response.cookies.get('refresh')
-        
-        # Log out (this should blacklist the refresh token)
+
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
         self.client.cookies['access'] = login_response.cookies.get('access')
         self.client.cookies['refresh'] = refresh_token
@@ -165,11 +185,9 @@ class RefreshTokenTests(APITestCase):
         logout_response = self.client.post(logout_url, format='json')
         self.assertEqual(logout_response.status_code, status.HTTP_200_OK)
         
-        # Try to use the refresh token after logout
         refresh_url = reverse('token_refresh')
         refresh_response = self.client.post(refresh_url, format='json')
         
-        # Should fail because token is blacklisted
         self.assertEqual(refresh_response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(refresh_response.data['detail'], 'Invalid refresh token!')
         

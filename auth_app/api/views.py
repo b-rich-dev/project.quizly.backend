@@ -1,16 +1,23 @@
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
+    """
+    API view for user registration.
+    Allows any user to create a new account with username, email, and password.
+    """
+    
     permission_classes = [AllowAny]
     
     def post(self, request):
@@ -20,18 +27,15 @@ class RegisterView(APIView):
             data = {'detail': "User created successfully."}
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
- 
-@method_decorator(csrf_exempt, name='dispatch')
-class TestView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request):
-        return Response({"message": "This is a test endpoint."}, status=status.HTTP_200_OK)   
     
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CookieLoginView(TokenObtainPairView):
+    """
+    API view for user login with JWT tokens stored in HTTP-only cookies.
+    Returns access and refresh tokens in secure cookies along with user data.
+    """
+    
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
@@ -63,6 +67,11 @@ class CookieLoginView(TokenObtainPairView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CookieTokenRefreshView(TokenRefreshView):
+    """
+    API view for refreshing JWT access tokens using refresh token from cookies.
+    Validates the refresh token and issues a new access token in a secure cookie.
+    """
+    
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh')
         
@@ -92,7 +101,10 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 @method_decorator(csrf_exempt, name='dispatch')    
 class LogoutView(APIView):
-    """API view for user logout."""
+    """
+    API view for user logout.
+    Blacklists the refresh token and deletes authentication cookies for authenticated users.
+    """
     
     permission_classes = [IsAuthenticated]
 
