@@ -2,6 +2,7 @@ from django.conf import settings
 
 import os
 import re
+import uuid
 import json
 import logging
 import yt_dlp
@@ -56,7 +57,6 @@ def download_youtube_audio(video_url: str) -> str:
     """Download audio from YouTube video."""
     
     try:
-        import uuid
         temp_filename = os.path.join(settings.MEDIA_ROOT, f'temp_audio_{uuid.uuid4().hex}')
         
         ydl_opts = {

@@ -155,10 +155,6 @@ Edit `.env` and add your configuration (see [Environment Configuration](#environ
 Create a `.env` file in the project root with the following variables:
 
 ```env
-# Django Settings
-SECRET_KEY=your-secret-key-here-change-this-in-production
-DEBUG=True
-
 # Gemini API Key (REQUIRED)
 # Get your API key from: https://ai.google.dev/
 GEMINI_API_KEY=your-gemini-api-key-here
@@ -170,6 +166,8 @@ GEMINI_API_KEY=your-gemini-api-key-here
 # Leave empty or comment out if FFmpeg is already in PATH
 # FFMPEG_PATH=
 ```
+
+**Note:** `SECRET_KEY` and `DEBUG` are configured directly in `core/settings.py`. For production deployment, you must update these values in the settings file (see [Production Deployment](#production-deployment)).
 
 ### Getting a Gemini API Key
 
@@ -639,48 +637,53 @@ model = whisper.load_model("base")  # Options: tiny, base, small, medium, large
 
 ### Pre-deployment Checklist
 
-1. **Environment Variables:**
-   ```env
-   DEBUG=False
-   SECRET_KEY=<generate-strong-secret-key>
-   GEMINI_API_KEY=<your-api-key>
+1. **Update Settings in `core/settings.py`:**
+   ```python
+   # CRITICAL: Change these values before deploying to production
+   SECRET_KEY = '<generate-strong-secret-key>'  # Generate a new secret key
+   DEBUG = False  # MUST be False in production
+   ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
    ```
 
-2. **Security Settings:**
+2. **Environment Variables (.env file):**
+   ```env
+   GEMINI_API_KEY=<your-api-key>
+   # FFMPEG_PATH=<path-if-needed>
+   ```
+
+3. **Security Settings (add to `core/settings.py`):**
    ```python
-   # In settings.py
-   DEBUG = False
-   ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
+   # Update existing settings
    CSRF_TRUSTED_ORIGINS = ['https://yourdomain.com']
    CORS_ALLOWED_ORIGINS = ['https://your-frontend.com']
    
-   # For HTTPS
+   # Add for HTTPS
    SECURE_SSL_REDIRECT = True
    SESSION_COOKIE_SECURE = True
    CSRF_COOKIE_SECURE = True
    ```
 
-3. **Web Server Configuration:**
+4. **Web Server Configuration:**
    - **Timeout:** Set to 300+ seconds (YouTube processing can be slow)
    - **Gunicorn example:**
      ```bash
      gunicorn core.wsgi:application --timeout 300 --workers 4
      ```
 
-4. **Static Files:**
+5. **Static Files:**
    ```bash
    python manage.py collectstatic --noinput
    ```
 
-5. **Database:**
+6. **Database:**
    - Consider PostgreSQL for production
    - Update `DATABASES` in `settings.py`
 
-6. **FFmpeg:**
+7. **FFmpeg:**
    - Ensure FFmpeg is installed on production server
    - Add to system PATH or set `FFMPEG_PATH` in `.env`
 
-7. **Media Files:**
+8. **Media Files:**
    - Configure proper storage for `media/` directory
    - Consider cleanup job for temporary audio files
 
