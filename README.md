@@ -144,8 +144,8 @@ pip install -r requirements.txt
 ### 4. Create Environment File
 
 ```bash
-# Copy the example file
-cp .env.example .env
+# Copy the template file
+cp .env.template .env
 ```
 
 Edit `.env` and add your configuration (see [Environment Configuration](#environment-configuration))
